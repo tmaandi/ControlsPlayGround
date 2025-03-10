@@ -1,26 +1,28 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
-from mpc import MPC  # Assuming an MPC class is defined in mpc.py
 
-def mass_spring_dynamics(t, y, u):
-    m = 1.0  # mass
-    k = 1.0  # spring constant
-    b = 0.2  # damping coefficient
-    x, v = y
-    dxdt = v
-    dvdt = (u - b * v - k * x) / m
-    return [dxdt, dvdt]
+from controllers.mpc import MPCController
+from plants.mass_spring_damper import MassSpringDamper
 
-def mpc_control(x, v, setpoint):
-    # Placeholder for a simple proportional controller
-    kp = 10.0
-    return kp * (setpoint - x)
+# Plant Parameters
+mass = 1.0
+spring_constant = 1.0
+damping_coefficient = 0.5
+initial_position = 0.0
+initial_velocity = 0.0
+
+# Simulation Parameters
+solver='continuous'
+t_span = (0, 10)
+
+# Controller Parameters
+setpoint = 1.0  # desired position
+
+
 
 def simulate_mass_spring_mpc():
-    t_span = (0, 10)
-    y0 = [0, 0]  # initial conditions: [position, velocity]
-    setpoint = 1.0  # desired position
+
 
     def closed_loop_dynamics(t, y):
         x, v = y
@@ -29,15 +31,12 @@ def simulate_mass_spring_mpc():
 
     sol = solve_ivp(closed_loop_dynamics, t_span, y0, t_eval=np.linspace(0, 10, 100))
 
-    # Define system parameters
-    mass = 1.0
-    spring_constant = 1.0
-
     # Initialize MPC controller
-    mpc_controller = MPC()
+    mpc_controller = MPCController()
 
     # Simulation loop
     for t in range(100):
+        state = [sol.y[0][t], sol.y[1][t]]  # Define the state as [position, velocity]
         control_input = mpc_controller.compute_control(state)
 
     plt.plot(sol.t, sol.y[0], label='Position')

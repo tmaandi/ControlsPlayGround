@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from pid import PID  # Assuming a PID class is defined in pid.py
+from controllers.pid import PIDController
 
 def simulate_inverted_pendulum_pid():
     # Define system parameters
@@ -8,12 +8,25 @@ def simulate_inverted_pendulum_pid():
     gravity = 9.81
 
     # Initialize PID controller
-    pid_controller = PID()
+    pid_controller = PIDController()
+
+    # Initialize state
+    state = 0.0
+
+    # Initialize time and angle arrays
+    time = np.linspace(0, 10, 100)
+    angles = []
 
     # Simulation loop
-    for t in range(100):
+    for t in time:
         # Compute control input
         control_input = pid_controller.compute_control(state)
+        
+        # Update state (this is a placeholder, replace with actual state update logic)
+        state += control_input * 0.1
+        
+        # Store the angle
+        angles.append(state)
 
     # Plot results
     plt.plot(time, angles)
